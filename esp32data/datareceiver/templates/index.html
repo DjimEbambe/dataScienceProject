@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1 class="text-center my-5">Mesure des Données</h1>
+    
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link {% if not selected_local %}active{% endif %}" href="{% url 'home' %}">All</a>
+        </li>
+        {% for local in locations %}
+        <li class="nav-item">
+            <a class="nav-link {% if selected_local == local %}active{% endif %}" href="?local={{ local }}">{{ local }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content" id="tabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <form method="get" action="">
+                <label for="start_date">Date de début:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
+                <label for="end_date">Date de fin:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
+                <!-- Hidden input for local -->
+                {% if selected_local and selected_local != 'all' %}
+                <input type="hidden" name="local" value="{{ selected_local }}">
+                {% endif %}
+                <button type="submit">Filtrer</button>
+            </form>
+            <a href="{% url 'export_csv' %}?local={{ selected_local }}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}">Exporter CSV</a> |
+            <a href="{% url 'export_excel' %}?local={{ selected_local }}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}">Exporter Excel</a> |
+            <a href="{% url 'export_json' %}?local={{ selected_local }}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}">Exporter JSON</a>
+            <table class="table table-striped my-4">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Temperature (°C)</th>
+                        <th>Humidité (%)</th>
+                        <th>Courant (A)</th>
+                        <th>Tension (V)</th>
+                        <th>Energie (kWh)</th>
+                        <th>Local</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in page_obj %}
+                    <tr>
+                        <td>{{ m.timestamp }}</td>
+                        <td>{{ m.temperature }}</td>
+                        <td>{{ m.humidity }}</td>
+                        <td>{{ m.current }}</td>
+                        <td>{{ m.voltage }}</td>
+                        <td>{{ m.energy }}</td>
+                        <td>{{ m.local }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="">
+                <nav aria-label="Exemple de navigation de pagination">
+                    <ul class="pagination justify-content-center">
+                      <!-- Lien vers la première page -->
+                      {% if not page_obj.number == 1 %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page=1&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}{% if selected_local and selected_local != 'all' %}&local={{ selected_local }}{% endif %}" aria-label="Première">
+                          <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                      </li>
+                      {% else %}
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Première">
+                          <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                      </li>
+                      {% endif %}
+                  
+                      <!-- Lien vers la page précédente -->
+                      {% if page_obj.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}{% if selected_local and selected_local != 'all' %}&local={{ selected_local }}{% endif %}" aria-label="Précédente">
+                          <span aria-hidden="true">&laquo; </span>
+                        </a>
+                      </li>
+                      {% else %}
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Précédente">
+                          <span aria-hidden="true">&laquo; </span>
+                        </a>
+                      </li>
+                      {% endif %}
+                  
+                      <!-- Indicateur de page courante (non cliquable, juste informatif) -->
+                      <li class="page-item active">
+                        <a class="page-link" href="#">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a>
+                      </li>
+                  
+                      <!-- Lien vers la page suivante -->
+                      {% if page_obj.has_next %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}{% if selected_local and selected_local != 'all' %}&local={{ selected_local }}{% endif %}" aria-label="Suivante">
+                          <span aria-hidden="true">&raquo;</span>
+                        </a>
+                      </li>
+                      {% else %}
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Suivante">
+                          <span aria-hidden="true">&raquo;</span>
+                        </a>
+                      </li>
+                      {% endif %}
+                  
+                      <!-- Lien vers la dernière page -->
+                      {% if not page_obj.number == page_obj.paginator.num_pages %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}{% if selected_local and selected_local != 'all' %}&local={{ selected_local }}{% endif %}" aria-label="Dernière">
+                          <span aria-hidden="true"> &raquo;&raquo;</span>
+                        </a>
+                      </li>
+                      {% else %}
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Dernière">
+                          <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                      </li>
+                      {% endif %}
+                    </ul>
+                  </nav>
+                                                      
+            </div>
+            
+            <!-- Render Bokeh plots -->
+            <div class="card justify-content-center">
+              <div class="card-header justify-content-center text-center ">
+                <a href="?get=1{% if selected_local %}&local={{ selected_local }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}">
+                  <button type="button" class="btn btn-primary">Afficher les modèles de prévision</button>
+                </a>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mx-auto">
+                  {% if humidity_forecast_script and humidity_forecast_div %}
+                    {{ humidity_forecast_script|safe }}
+                    {{ humidity_forecast_div|safe }}
+                  {% else %}
+                    {{ humidity_graph_script|safe }}
+                    {{ humidity_graph_div|safe }}
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mx-auto">
+                  {% if temperature_forecast_script and temperature_forecast_div %}
+                    {{ temperature_forecast_script|safe }}
+                    {{ temperature_forecast_div|safe }}
+                  {% else %}
+                    {{ temperature_graph_script|safe }}
+                    {{ temperature_graph_div|safe }}
+                  {% endif %}
+                </div>
+                <div class="mx-auto p-2">
+                  {% if energy_forecast_script and energy_forecast_div %}
+                    {{ energy_forecast_script|safe }}
+                    {{ energy_forecast_div|safe }}
+                  {% else %}
+                    {{ energy_graph_script|safe }}
+                    {{ energy_graph_div|safe }}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+

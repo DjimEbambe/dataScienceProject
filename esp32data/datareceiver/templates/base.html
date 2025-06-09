@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master ULC ICAM</title>
+    {% load static %}
+    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="icon" href="">
+    <title>{% block title %} Accueil {% endblock %} </title>
+    {% block static %}  {% endblock %}
+    <title>Forecasting</title>
+    <link rel="stylesheet" href="https://cdn.bokeh.org/bokeh/release/bokeh-3.4.1.min.css" type="text/css">
+    
+</head>
+
+    <body>
+      <main class="container pt-1 bg-light">
+          {% block content %}{% endblock %}
+      </main>
+
+    <!-- Js  -->
+    <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/bokeh.min.js' %}"></script>
+    {% block js %} {% endblock %}
+    </body>
+
+</html>
